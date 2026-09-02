@@ -9,7 +9,43 @@ public class NexoraBank {
     // in method, we pass the  Scanner instance and Connection instance as a parameter.. bcz if we create those in every method...
     // then the number of instances in our program will be huge... and also all instance should be closed before wrap up the program
 
+//Check Balance
+    private static void checkBalance(Scanner sc, Connection connection)
+    {
+        try {
+            System.out.print("Enter Account Number: ");
+            String accountNumber = sc.nextLine();
+            System.out.println();
 
+            System.out.print("Enter PIN number: ");
+            int pinNumber = sc.nextInt();
+            sc.nextLine();
+            System.out.println();
+
+            String checkBalanceQuery = "select account_balance from accounts where account_number = ? and account_pin = ?";
+            PreparedStatement checkBalanceStatement = connection.prepareStatement(checkBalanceQuery);
+
+            checkBalanceStatement.setString(1,accountNumber);
+            checkBalanceStatement.setInt(2,pinNumber);
+
+            ResultSet resultSet = checkBalanceStatement.executeQuery();
+
+            if(resultSet.next())
+            {
+                double balance =  resultSet.getDouble("account_balance");
+                System.out.println("Current Balance : "+ balance);
+            }
+            else
+            {
+                System.out.println("Invalid Account Number or PIN");
+            }
+        }
+        catch(SQLException e)
+        {
+            System.out.println(e.getMessage());
+        }
+
+    }
     //Create Transfrer Money
     private static void transferMoney(Scanner sc , Connection connection) throws SQLException {
         try {
@@ -39,6 +75,30 @@ public class NexoraBank {
             PreparedStatement receiverStatement = connection.prepareStatement(receiverUpdateQuery);
             receiverStatement.setString(1,to_accountNumber);
             ResultSet receiverResult = receiverStatement.executeQuery();
+
+            if(senderResult.next())
+            {
+                double currentBalance = senderResult.getDouble("account_balance");
+                if(currentBalance>=transfer_amount)
+                {
+                    double newBalance = currentBalance-transfer_amount;
+                    String updateQuery = "update accounts set account_balance = ? where account_number = ? ";
+
+                    PreparedStatement updateStatement = connection.prepareStatement(updateQuery);
+                    updateStatement.setDouble(1,newBalance);
+                    updateStatement.setString(2,from_accountNumber);
+                    int rowsAffected = updateStatement.executeUpdate();
+                    if(rowsAffected>0)
+                    {
+                        System.out.println("Balanced update Successfully....");
+                    }
+                    else
+                    {
+                        connection.rollback();
+                        System.out.println("Insufficient Balance...");
+                    }
+                }
+            }
 
             if(receiverResult.next())
             {
@@ -77,29 +137,7 @@ public class NexoraBank {
                     System.out.println("Account Not Found");
                 }
             }
-            if(senderResult.next())
-            {
-                double currentBalance = senderResult.getDouble("account_balance");
-                if(currentBalance>=transfer_amount)
-                {
-                    double newBalance = currentBalance-transfer_amount;
-                    String updateQuery = "update accounts set account_balance = ? where account_number = ? ";
 
-                    PreparedStatement updateStatement = connection.prepareStatement(updateQuery);
-                    updateStatement.setDouble(1,newBalance);
-                    updateStatement.setString(2,from_accountNumber);
-                    int rowsAffected = updateStatement.executeUpdate();
-                    if(rowsAffected>0)
-                    {
-                        System.out.println("Balanced update Successfully....");
-                    }
-                    else
-                    {
-                        connection.rollback();
-                        System.out.println("Insufficient Balance...");
-                    }
-                }
-            }
         }
         catch (SQLException e)
         {
@@ -376,5 +414,10 @@ public class NexoraBank {
 //        withdrawMoney(sc,connection);
         System.out.println("************************ Enter Details for Transfer Money ******************");
         transferMoney(sc,connection);
+
+        System.out.println("**************** Enter Details For Check Balance *****************");
+        checkBalance(sc,connection);
+
+
     }
 }
