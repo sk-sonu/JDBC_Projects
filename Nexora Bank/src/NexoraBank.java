@@ -8,7 +8,55 @@ public class NexoraBank {
     private static final String username = "root";
     // in method, we pass the  Scanner instance and Connection instance as a parameter.. bcz if we create those in every method...
     // then the number of instances in our program will be huge... and also all instance should be closed before wrap up the program
+    // Create Transaction History
+    private static void transactionHistory(Scanner sc , Connection connection)
+    {
+        try {
+            System.out.print("Enter Account Number: ");
+            String accountNumber = sc.nextLine();
+            System.out.println();
 
+
+
+            String query = "select * from transactions where from_account = ? or to_account = ? order by transaction_date desc";
+            PreparedStatement transactionQuery = connection.prepareStatement(query);
+            transactionQuery.setString(1,accountNumber);
+            transactionQuery.setString(2,accountNumber);
+
+            ResultSet resultSet = transactionQuery.executeQuery();
+            boolean found = false;
+            while(resultSet.next())
+            {
+                found = true;
+                int transaction_ID = resultSet.getInt("transaction_ID");
+                String from_Account = resultSet.getString("from_account");
+                String to_Account = resultSet.getString("to_account");
+                double amount = resultSet.getDouble("amount");
+                String transaction_type = resultSet.getString("transaction_type");
+                Timestamp timestamp = resultSet.getTimestamp("transaction_date");
+                String transaction_status = resultSet.getString("transaction_status");
+
+
+                System.out.println("****************** Transactions Details ********************");
+
+                System.out.println("Transaction ID : "+ transaction_ID);
+                System.out.println("From Account: "+ from_Account);
+                System.out.println("To Account: "+ to_Account);
+                System.out.println("Amount: "+ amount);
+                System.out.println("Transaction Type: "+transaction_type);
+                System.out.println("Transaction Time: "+ timestamp);
+                System.out.println("Transaction Status: "+ transaction_status);
+            }
+            if(!found)
+            {
+                System.out.println("Transaction Not Found...");
+            }
+        }
+        catch(SQLException e)
+        {
+            System.out.println(e.getMessage());
+        }
+    }
 //Check Balance
     private static void checkBalance(Scanner sc, Connection connection)
     {
@@ -412,12 +460,13 @@ public class NexoraBank {
 //        depositMoney(sc, connection);
 //        System.out.println("************** Enter Details for Money Withdraw **************");
 //        withdrawMoney(sc,connection);
-        System.out.println("************************ Enter Details for Transfer Money ******************");
-        transferMoney(sc,connection);
+//        System.out.println("************************ Enter Details for Transfer Money ******************");
+//        transferMoney(sc,connection);
+//
+//        System.out.println("**************** Enter Details For Check Balance *****************");
+//        checkBalance(sc,connection);
 
-        System.out.println("**************** Enter Details For Check Balance *****************");
-        checkBalance(sc,connection);
-
-
+            System.out.println("****************** Enter Details Fro  check Transaction History *******************");
+        transactionHistory(sc,connection);
     }
 }
