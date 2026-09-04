@@ -94,7 +94,7 @@ public class NexoraBank {
         }
 
     }
-    //Create Transfrer Money
+    //Create Transfer Money
     private static void transferMoney(Scanner sc , Connection connection) throws SQLException {
         try {
             connection.setAutoCommit(false);
@@ -110,25 +110,49 @@ public class NexoraBank {
             double transfer_amount = sc.nextDouble();
             sc.nextLine();
             System.out.println();
+            if(transfer_amount<=0)
+            {
+                System.out.println("Invalid Amount....");
+                return;
+            }
 
+            if(from_accountNumber.equals(to_accountNumber))
+            {
+                System.out.println("Sender and Receiver Acount Cannot Be Same...");
+                return;
+            }
             String senderUpdateQuery = "select account_balance from accounts where account_number = ?";
 
             PreparedStatement senderStatement = connection.prepareStatement(senderUpdateQuery);
             senderStatement.setString(1,from_accountNumber);
 
             ResultSet senderResult = senderStatement.executeQuery();
-
+            if(!senderResult.next())
+            {
+                System.out.println("Sender Account Not Found...");
+                connection.rollback();
+                return;
+            }
 
             String receiverUpdateQuery = "select account_balance from accounts where account_number =?";
             PreparedStatement receiverStatement = connection.prepareStatement(receiverUpdateQuery);
             receiverStatement.setString(1,to_accountNumber);
             ResultSet receiverResult = receiverStatement.executeQuery();
-
-            if(senderResult.next())
+            if(!receiverResult.next())
             {
+                System.out.println("Receiver Account NOT Found...");
+                connection.rollback();
+                return;
+            }
+
                 double currentBalance = senderResult.getDouble("account_balance");
-                if(currentBalance>=transfer_amount)
+                if(currentBalance<transfer_amount)
                 {
+                    System.out.println("Insufficient Balance");
+                    connection.rollback();
+                    return;
+                }
+
                     double newBalance = currentBalance-transfer_amount;
                     String updateQuery = "update accounts set account_balance = ? where account_number = ? ";
 
@@ -136,20 +160,15 @@ public class NexoraBank {
                     updateStatement.setDouble(1,newBalance);
                     updateStatement.setString(2,from_accountNumber);
                     int rowsAffected = updateStatement.executeUpdate();
-                    if(rowsAffected>0)
-                    {
-                        System.out.println("Balanced update Successfully....");
-                    }
-                    else
+                    if(rowsAffected<=0)
                     {
                         connection.rollback();
-                        System.out.println("Insufficient Balance...");
+                        System.out.println("Sender Balance Update Failed..");
+                        return;
                     }
-                }
-            }
+                    System.out.println("Sender Balance Update Successfully...");
 
-            if(receiverResult.next())
-            {
+
                 double receiverBalance = receiverResult.getDouble("account_balance");
                 double newReceiverBalance = receiverBalance+transfer_amount;
                 String receiverSetQuery = "update accounts set account_balance = ? where account_number = ?";
@@ -184,8 +203,6 @@ public class NexoraBank {
                     connection.rollback();
                     System.out.println("Account Not Found");
                 }
-            }
-
         }
         catch (SQLException e)
         {
@@ -207,6 +224,11 @@ public class NexoraBank {
             double withdrawAmount = sc.nextDouble();
             sc.nextLine();
             System.out.println();
+            if(withdrawAmount<=0)
+            {
+                System.out.println("Invalid Amount...");
+                return;
+            }
 
             String query = "select account_balance from accounts where account_number = ? ";
             PreparedStatement preparedStatement = connection.prepareStatement(query);
@@ -260,7 +282,11 @@ public class NexoraBank {
                     }
 
                 }
-
+                else
+                {
+                    System.out.println("Insufficient Balance...");
+                    return;
+                }
             }
             else
             {
@@ -289,6 +315,11 @@ public class NexoraBank {
             double depositAmount = sc.nextDouble();
             sc.nextLine();
             System.out.println();
+            if(depositAmount<=0)
+            {
+                System.out.println("Invalid Amount...");
+                return;
+            }
             // Take the input from the users(account number and deposit amount) for write the sql query..
                 String query = "select account_balance from accounts where account_number = ?"; // this is the SQL query.
             // it selects the account_balance column from the accounts table.. and matching the exact column by account number
@@ -456,17 +487,17 @@ public class NexoraBank {
 //        createCustomer(sc,connection);
 //        System.out.println("******************* Enter details for Create Account *********************");
 //        createAccount(sc,connection);
-//        System.out.println("**************************** Enter details for deposite Money ********************");
-//        depositMoney(sc, connection);
+        System.out.println("**************************** Enter details for deposit Money ********************");
+        depositMoney(sc, connection);
 //        System.out.println("************** Enter Details for Money Withdraw **************");
 //        withdrawMoney(sc,connection);
-//        System.out.println("************************ Enter Details for Transfer Money ******************");
-//        transferMoney(sc,connection);
+        System.out.println("************************ Enter Details for Transfer Money ******************");
+        transferMoney(sc,connection);
 //
 //        System.out.println("**************** Enter Details For Check Balance *****************");
 //        checkBalance(sc,connection);
 
-            System.out.println("****************** Enter Details Fro  check Transaction History *******************");
-        transactionHistory(sc,connection);
+//            System.out.println("****************** Enter Details For  check Transaction History *******************");
+//        transactionHistory(sc,connection);
     }
 }
