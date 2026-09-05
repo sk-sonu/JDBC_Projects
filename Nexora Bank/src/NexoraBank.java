@@ -1,7 +1,8 @@
 import java.sql.ResultSet;
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.Scanner;
-
+import java.time.LocalDateTime;
 public class NexoraBank {
     private static final String url = "jdbc:mysql://localhost:3306/nexora_bank"; // this is the url of upto "nexora_bank"  jdbc:mysql://localhost:3306/ this is same all time...
     private static final String password = "Sonu@2002"; // this is the password of  sql server which is created at the first time of install the server in pc.
@@ -100,10 +101,21 @@ public class NexoraBank {
             connection.setAutoCommit(false);
             System.out.print("Enter From Account (Sender) Number: ");
             String from_accountNumber = sc.nextLine();
+                if(from_accountNumber.trim().isEmpty())
+                {
+                    System.out.println("Sender Account Number Cannot Be Empty....");
+                    return;
+                }
             System.out.println();
 
             System.out.print("Enter to Account (Receiver) Number: ");
             String to_accountNumber = sc.nextLine();
+            //.trim()- means... if input is just a vacant space... then it will also invalid.. so it will also return...
+            if(to_accountNumber.trim().isEmpty())
+            {
+                System.out.println("Receiver Account Number Cannot Be Empty....");
+                return;
+            }
             System.out.println();
 
             System.out.println("Enter Transfer Amount: ");
@@ -386,9 +398,26 @@ public class NexoraBank {
             System.out.print("Enter Customer ID: ");
             int customerId = sc.nextInt();
             sc.nextLine();
-            System.out.print("Enter Account Number: ");
-            String accountNumber = sc.nextLine();
-            System.out.println();
+
+//            System.out.print("Enter Account Number: ");
+//            String accountNumber = sc.nextLine();
+//            System.out.println();
+            String accountNumber = "";
+            int currentYear = LocalDate.now().getYear();
+            String customerCheckQuery = "select customer_ID from customers where customer_ID = ?";
+            String customerIdFormatted = String.format("%3d",customerId); // customer id is formatted to 3 digits .. if customer id is of 1 digit.. then it will have 2 zeroes before the digit...
+            String countAccountQuery = "select count(*) from accounts where customer_id = ?";
+            PreparedStatement countStatement = connection.prepareStatement(countAccountQuery);
+            countStatement.setInt(1,customerId);
+
+            ResultSet countResultSet = countStatement.executeQuery();
+            if(countResultSet.next())
+            {
+                int accCount = countResultSet.getInt(1);
+                int accountSequence = accCount+1;
+                String sequenceFormatted = String.format("%03d",accountSequence);
+                accountNumber = "NXRBNK"+currentYear+customerIdFormatted+sequenceFormatted;
+            }
             System.out.print("Enter Account Type: ");
             String accountType = sc.nextLine();
             System.out.println();
