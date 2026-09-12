@@ -405,7 +405,15 @@ public class NexoraBank {
             String accountNumber = "";
             int currentYear = LocalDate.now().getYear();
             String customerCheckQuery = "select customer_ID from customers where customer_ID = ?";
-            String customerIdFormatted = String.format("%3d",customerId); // customer id is formatted to 3 digits .. if customer id is of 1 digit.. then it will have 2 zeroes before the digit...
+            String customerIdFormatted = String.format("%03d",customerId); // customer id is formatted to 3 digits .. if customer id is of 1 digit.. then it will have 2 zeroes before the digit...
+            PreparedStatement customerCheckStatement = connection.prepareStatement(customerCheckQuery);
+            customerCheckStatement.setInt(1,customerId);
+            ResultSet  customerResultSet = customerCheckStatement.executeQuery();
+            if(!customerResultSet.next())
+            {
+                System.out.println("Customer ID NOT Found....");
+                return;
+            }
             String countAccountQuery = "select count(*) from accounts where customer_id = ?";
             PreparedStatement countStatement = connection.prepareStatement(countAccountQuery);
             countStatement.setInt(1,customerId);
@@ -416,22 +424,45 @@ public class NexoraBank {
                 int accCount = countResultSet.getInt(1);
                 int accountSequence = accCount+1;
                 String sequenceFormatted = String.format("%03d",accountSequence);
+
                 accountNumber = "NXRBNK"+currentYear+customerIdFormatted+sequenceFormatted;
             }
-            System.out.print("Enter Account Type: ");
+            System.out.print("Enter Account Type-(savings || current): ");
             String accountType = sc.nextLine();
             System.out.println();
+            if(!accountType.equalsIgnoreCase("SAVINGS") && !accountType.equalsIgnoreCase("CURRENT"))
+            {
+                System.out.println("Invalid Account Type....");
+                return;
+            }
             System.out.print("Enter Account Balance: ");
             double accountBalance = sc.nextDouble();
             System.out.println();
             sc.nextLine();
+
+            if(accountBalance<0)
+            {
+                System.out.println("Account Balance Cannot be Negative...");
+                return;
+            }
             System.out.print("Enter Account Pin: ");
             int accountPin = sc.nextInt();
             System.out.println();
             sc.nextLine();
+            if(accountPin<1000 || accountPin>9999)
+            {
+                System.out.println("Account Pin Must be 4 Digits....");
+                return;
+            }
             System.out.print("Enter Account Status: ");
             String accountStatus = sc.nextLine();
             System.out.println();
+
+            if(!accountStatus.equalsIgnoreCase("ACTIVE") && !accountStatus.equalsIgnoreCase("INACTIVE"))
+            {
+                System.out.println("Invalid Account Status....");
+                return;
+            }
             String query = "insert into accounts (customer_ID,account_number, account_type,account_balance,account_pin,account_status) values(?,?,?,?,?,?)";
             try(PreparedStatement preparedStatement = connection.prepareStatement(query))
             {
@@ -514,14 +545,14 @@ public class NexoraBank {
         }
 //        System.out.println("************************* Enter Details for Create Customer ********************");
 //        createCustomer(sc,connection);
-//        System.out.println("******************* Enter details for Create Account *********************");
-//        createAccount(sc,connection);
-        System.out.println("**************************** Enter details for deposit Money ********************");
-        depositMoney(sc, connection);
+        System.out.println("******************* Enter details for Create Account *********************");
+        createAccount(sc,connection);
+//        System.out.println("**************************** Enter details for deposit Money ********************");
+//        depositMoney(sc, connection);
 //        System.out.println("************** Enter Details for Money Withdraw **************");
 //        withdrawMoney(sc,connection);
-        System.out.println("************************ Enter Details for Transfer Money ******************");
-        transferMoney(sc,connection);
+//        System.out.println("************************ Enter Details for Transfer Money ******************");
+//        transferMoney(sc,connection);
 //
 //        System.out.println("**************** Enter Details For Check Balance *****************");
 //        checkBalance(sc,connection);
