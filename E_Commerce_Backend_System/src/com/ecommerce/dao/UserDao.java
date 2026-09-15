@@ -6,7 +6,7 @@ import java.sql.*;
 
 public class UserDao {
     // DAO - Data Access Object.. It is use to communicate with the data base;
-
+    // UPDATE OPERATION...
     public void updateUser(User user)
     {
         try
@@ -38,6 +38,7 @@ public class UserDao {
             System.out.println(e.getMessage());
         }
     }
+    //SELECT OPERATION
     public User getUserById(int userId)
     {
         try {
@@ -72,6 +73,7 @@ public class UserDao {
         }
         return null;
     }
+    // INSERT OPERATION
     public void createUser(User user)
     {
         try{
@@ -96,6 +98,64 @@ public class UserDao {
                 System.out.println("Data Not Inserted...");
             }
 
+        }
+        catch (SQLException e)
+        {
+            System.out.println(e.getMessage());
+        }
+    }
+        // DELETE OPERATION.
+    public void deleteUser(int userId)
+    {
+        try
+        {
+            String  deleteQuery = "delete from users where user_id = ?";
+            Connection connection = DatabaseConnection.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(deleteQuery);
+            preparedStatement.setInt(1,userId);
+            int rowsAffected = preparedStatement.executeUpdate();
+            if(rowsAffected>0)
+            {
+                System.out.println("User Deleted...");
+            }
+            else
+            {
+                System.out.println("User Not Found...");
+            }
+        }
+        catch(SQLException e)
+        {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public void getAllUsers()
+    {
+        try
+        {
+            Connection connection = DatabaseConnection.getConnection();
+            String printAllUserQuery = "select * from users";
+            PreparedStatement preparedStatement = connection.prepareStatement(printAllUserQuery);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while(resultSet.next())
+            {
+                int user_id = resultSet.getInt("user_id");
+                String name = resultSet.getString("name");
+                String email = resultSet.getString("email");
+                String password = resultSet.getString("password");
+                String role = resultSet.getString("role");
+                Timestamp createdAt = resultSet.getTimestamp("created_at");
+
+                System.out.println("**********************************-- INFORMATION --**********************************");
+                System.out.println();
+                System.out.println("User id : "+user_id);
+                System.out.println("Name : "+name);
+                System.out.println("Email :"+email);
+                System.out.println("Password :"+password);
+                System.out.println("Role : "+role);
+                System.out.println("Created At : "+ createdAt);
+            }
         }
         catch (SQLException e)
         {

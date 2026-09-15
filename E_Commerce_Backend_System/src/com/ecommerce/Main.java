@@ -3,6 +3,11 @@ package com.ecommerce;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Scanner;
+
+import com.ecommerce.dao.CategoryDao;
+import com.ecommerce.dao.ProductDao;
+import com.ecommerce.model.Category;
+import com.ecommerce.model.Product;
 import com.ecommerce.model.User;
 import com.ecommerce.dao.UserDao;
 public class Main {
@@ -26,18 +31,7 @@ public class Main {
 
     System.out.println("===================User===================");
 
-        UserDao userDao = new UserDao();
-
-        User foundUser = userDao.getUserById(1);
-
-
-        if(foundUser != null)
-        {
-            foundUser.setName("Kate Updated");
-            foundUser.setEmail("kateEmailUpdated@gmail.com");
-
-            userDao.updateUser(foundUser);
-        }
+        ProductDao productDao = new ProductDao();
 
 
     }
