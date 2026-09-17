@@ -32,7 +32,7 @@ public class Main {
     System.out.println("===================User===================");
 
         ProductDao productDao = new ProductDao();
-
+        productDao.getAllProducts();
 
     }
 }

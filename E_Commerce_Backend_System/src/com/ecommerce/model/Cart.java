@@ -7,7 +7,7 @@ public class Cart {
     private int user_id;
     private Timestamp created_at;
 
-    Cart(int user_id)
+    public Cart(int user_id)
     {
         this.user_id = user_id;
     }
