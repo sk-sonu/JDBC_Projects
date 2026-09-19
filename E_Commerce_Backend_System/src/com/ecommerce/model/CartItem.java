@@ -6,7 +6,7 @@ public class CartItem {
     private int product_id;
     private int quantity;
 
-    CartItem(int cart_id, int product_id, int quantity)
+    public CartItem(int cart_id, int product_id, int quantity)
     {
         this.cart_id = cart_id;
         this.product_id = product_id;

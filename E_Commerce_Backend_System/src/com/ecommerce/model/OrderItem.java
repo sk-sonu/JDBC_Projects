@@ -8,7 +8,7 @@ public class OrderItem {
  private  double price;
 
 
- OrderItem(int order_id, int product_id, int quantity, double price)
+ public OrderItem(int order_id, int product_id, int quantity, double price)
  {
      this.order_id = order_id;
      this.product_id = product_id ;

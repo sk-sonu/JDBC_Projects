@@ -10,7 +10,7 @@ private  String payment_status;
 private Timestamp payment_date;
 
 
-    Payment(String payment_method, int order_id)
+    public Payment(String payment_method, int order_id)
     {
         this.payment_method = payment_method;
         this.order_id = order_id;

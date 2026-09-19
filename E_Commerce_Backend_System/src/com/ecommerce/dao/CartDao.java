@@ -7,6 +7,72 @@ import java.sql.*;
 
 public class CartDao {
 
+    public void getAllCarts()
+    {
+        try
+        {
+            // Retrieve all carts from the cart table
+            String query = "SELECT * FROM cart";
+
+            Connection connection = DatabaseConnection.getConnection();
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            // Process each cart row one by one
+            while(resultSet.next())
+            {
+                int cart_id = resultSet.getInt("cart_id");
+                int user_id = resultSet.getInt("user_id");
+                Timestamp created_at = resultSet.getTimestamp("created_at");
+
+                // Display cart information
+                System.out.println("Cart ID: " + cart_id);
+                System.out.println("User ID: " + user_id);
+                System.out.println("Created At: " + created_at);
+                System.out.println("----------------------------");
+            }
+        }
+        catch(SQLException e)
+        {
+            System.out.println(e.getMessage());
+        }
+    }
+
+
+    public void deleteCart(int cartId)
+    {
+        try
+        {
+            // Delete an existing cart using its cart_id
+            String query = "DELETE FROM cart WHERE cart_id = ?";
+
+            Connection connection = DatabaseConnection.getConnection();
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+            // Set the cart_id to identify which cart should be deleted
+            preparedStatement.setInt(1, cartId);
+
+            int rowsAffected = preparedStatement.executeUpdate();
+
+            // Check whether the cart was actually deleted
+            if(rowsAffected > 0)
+            {
+                System.out.println("Cart deleted successfully.");
+            }
+            else
+            {
+                System.out.println("Cart not found.");
+            }
+        }
+        catch(SQLException e)
+        {
+            System.out.println(e.getMessage());
+        }
+    }
+
 
     public void updateCart(Cart cart)
     {

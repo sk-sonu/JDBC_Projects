@@ -9,7 +9,7 @@ public class Order {
     private String order_status;
     private Timestamp order_date;
 
-    Order(int user_id, double total_amount)
+    public Order(int user_id, double total_amount)
     {
         this.user_id = user_id;
         this.total_amount = total_amount;
