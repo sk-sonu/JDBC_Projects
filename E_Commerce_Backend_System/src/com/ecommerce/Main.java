@@ -31,8 +31,21 @@ public class Main {
 
     System.out.println("===================User===================");
 
-        ProductDao productDao = new ProductDao();
-        productDao.getAllProducts();
+        UserDao userDao = new UserDao();
+        User user = userDao.getUserById(9);
+
+        if(user != null)
+        {
+            user.setName("Rahul Updated");
+            user.setEmail("rahul_updated@gmail.com");
+            user.setPassword("54321");
+            user.setRole("customer");
+            userDao.updateUser(user);
+        }
+        else
+        {
+            System.out.println("User Not Found...");
+        }
 
     }
 }

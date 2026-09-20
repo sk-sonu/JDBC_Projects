@@ -1,15 +1,61 @@
 package com.ecommerce.dao;
 
 import com.ecommerce.DatabaseConnection;
+import com.ecommerce.model.CartItem;
 import com.ecommerce.model.OrderItem;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class OrderItemDao {
 
+
+    public void createOrderItemFromCartItem(int orderId, CartItem cartItem, double price)
+    {
+        OrderItem orderItem = new OrderItem(orderId, cartItem.getProduct_id(), cartItem.getQuantity(), price);
+
+        createOrderItem(orderItem);
+    }
+
+    public List<OrderItem> getOrderItemsByOrderId(int orderId)
+    {
+        List<OrderItem> orderItems = new ArrayList<>();
+
+        try
+        {
+            String query = "SELECT * FROM orders_items WHERE order_id = ?";
+
+            Connection connection = DatabaseConnection.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+            preparedStatement.setInt(1, orderId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while(resultSet.next())
+            {
+                int order_item_id = resultSet.getInt("order_item_id");
+                int product_id = resultSet.getInt("product_id");
+                int quantity = resultSet.getInt("quantity");
+                double price = resultSet.getDouble("price");
+
+                OrderItem orderItem = new OrderItem(orderId, product_id, quantity, price);
+                orderItem.setOrder_item_id(order_item_id);
+
+                orderItems.add(orderItem);
+            }
+        }
+        catch(SQLException e)
+        {
+            System.out.println(e.getMessage());
+        }
+
+        return orderItems;
+    }
 
     public void getAllOrderItems()
     {

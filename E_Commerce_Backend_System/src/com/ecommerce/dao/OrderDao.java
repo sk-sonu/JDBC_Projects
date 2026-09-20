@@ -7,6 +7,37 @@ import java.sql.*;
 
 public class OrderDao {
 
+
+    public int createOrderAndGetId(Order order)
+    {
+        int orderId = 0;
+
+        try
+        {
+            String query = "INSERT INTO orders (user_id, total_amount) VALUES (?, ?)";
+
+            Connection connection = DatabaseConnection.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+
+            preparedStatement.setInt(1, order.getUser_id());
+            preparedStatement.setDouble(2, order.getTotal_amount());
+
+            preparedStatement.executeUpdate();
+
+            ResultSet resultSet = preparedStatement.getGeneratedKeys();
+
+            if(resultSet.next())
+            {
+                orderId = resultSet.getInt(1);
+            }
+        }
+        catch(SQLException e)
+        {
+            System.out.println(e.getMessage());
+        }
+
+        return orderId;
+    }
     public void getAllOrders()
     {
         try

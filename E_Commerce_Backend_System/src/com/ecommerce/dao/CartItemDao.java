@@ -7,10 +7,77 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CartItemDao {
 
 
+    public CartItem getCartItemByCartIdAndProductId(int cartId, int productId)
+    {
+        CartItem cartItem = null;
+
+        try
+        {
+            String query = "SELECT * FROM cart_items WHERE cart_id = ? AND product_id = ?";
+
+            Connection connection = DatabaseConnection.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+            preparedStatement.setInt(1, cartId);
+            preparedStatement.setInt(2, productId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if(resultSet.next())
+            {
+                int cart_item_id = resultSet.getInt("cart_item_id");
+                int quantity = resultSet.getInt("quantity");
+
+                cartItem = new CartItem(cartId, productId, quantity);
+                cartItem.setCart_item_id(cart_item_id);
+            }
+        }
+        catch(SQLException e)
+        {
+            System.out.println(e.getMessage());
+        }
+
+        return cartItem;
+    }
+
+    public CartItem getCartItemById(int cartItemId)
+    {
+        CartItem cartItem = null;
+
+        try
+        {
+            String query = "SELECT * FROM cart_items WHERE cart_item_id = ?";
+
+            Connection connection = DatabaseConnection.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+            preparedStatement.setInt(1, cartItemId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if(resultSet.next())
+            {
+                int cart_id = resultSet.getInt("cart_id");
+                int product_id = resultSet.getInt("product_id");
+                int quantity = resultSet.getInt("quantity");
+
+                cartItem = new CartItem(cart_id, product_id, quantity);
+                cartItem.setCart_item_id(cartItemId);
+            }
+        }
+        catch(SQLException e)
+        {
+            System.out.println(e.getMessage());
+        }
+
+        return cartItem;
+    }
     public void getAllCartItems()
     {
         try
@@ -114,38 +181,31 @@ public class CartItemDao {
         }
     }
 
-
-    public CartItem getCartItemById(int cartItemId)
+    public List<CartItem> getCartItemsByCartId(int cartId)
     {
+        List<CartItem> cartItems = new ArrayList<>();
+
         try
         {
-            // Find one cart item using its cart_item_id
-            String query = "SELECT * FROM cart_items WHERE cart_item_id = ?";
+            String query = "SELECT * FROM cart_items WHERE cart_id = ?";
 
             Connection connection = DatabaseConnection.getConnection();
-
             PreparedStatement preparedStatement = connection.prepareStatement(query);
 
-            // Set the ID of the cart item we want to find
-            preparedStatement.setInt(1, cartItemId);
+            preparedStatement.setInt(1, cartId);
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
-            // Check whether the cart item exists
-            if(resultSet.next())
+            while(resultSet.next())
             {
-                int id = resultSet.getInt("cart_item_id");
-                int cart_id = resultSet.getInt("cart_id");
+                int cart_item_id = resultSet.getInt("cart_item_id");
                 int product_id = resultSet.getInt("product_id");
                 int quantity = resultSet.getInt("quantity");
 
-                // Create a CartItem object using the retrieved data
-                CartItem cartItem = new CartItem(cart_id, product_id, quantity);
+                CartItem cartItem = new CartItem(cartId, product_id, quantity);
+                cartItem.setCart_item_id(cart_item_id);
 
-                // Set the database-generated ID into the Java object
-                cartItem.setCart_item_id(id);
-
-                return cartItem;
+                cartItems.add(cartItem);
             }
         }
         catch(SQLException e)
@@ -153,9 +213,8 @@ public class CartItemDao {
             System.out.println(e.getMessage());
         }
 
-        return null;
+        return cartItems;
     }
-
     public void createCartItem(CartItem cartItem)
     {
         try
